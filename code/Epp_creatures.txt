@@ -1,1 +1,3 @@
-
+hi hi bye;
+repeat 10 template;
+for creature melee + 10;
