@@ -1,3 +1,2 @@
-hi hi bye;
-repeat 10 template;
-for creature melee + 10;
+new Creature(sprite="unicorn",name="Unicorn",archeryIncrease=10);
+new Creature(sprite="unicorn",name="Unicorn",archeryIncrease=10);

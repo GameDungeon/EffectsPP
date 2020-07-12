@@ -1,20 +1,23 @@
 import sys
 import os
-from parseClass import Parse
 
-def command(line, i):
+from EffectsPP.ParserCode.parseClass import Parse
+
+def write(lines):
+    with open("creatures.txt", "w") as f:
+        f.write(lines)
+
+def execute(file):
     parse = Parse()
-    if line[i] in parse.funcList:
-        out = getattr(Parse, line[i])()
-
-def execute(line):
-    i = 0
     output = []
-    while i < len(line):
-        i, out = command(line, i)
-        output.append(out)
-    
-
+    for line in file:
+        i = 0
+        while i < len(line):
+            if line[i] in parse.funcList:
+                i = getattr(Parse, line[i])(parse, line, i)
+            else:
+                i+=1
+            
 def parse(txt):
     output = []
     txt = txt.replace("\n", "").split(";")
