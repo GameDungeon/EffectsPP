@@ -85,6 +85,7 @@ class Creature():
   }}
   '''
 
-  class Var()
+  class Var():
+      pass
 
 
