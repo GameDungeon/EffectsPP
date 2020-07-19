@@ -8,28 +8,34 @@ import EffectsPP.ParserCode.compileCode as compileCode
 class Parse():
     def __init__(self):
         super().__init__()
-        self.funcList = ['hi', 'new']
-        self.stack = []
+        self.funcList = ['new', '=']
+        self.var = {"Null":None}
+        self.DiffCall = {'=': "equal"}
 
-    def hi(self, line, i):
-        i = i+1
-        compileCode.write(Creature().text())
-        return i
+    def useVars(self, perams):
+        return str(tuple(perams[1:-1].split(",")))
+
+    def equal(self, line, i):
+        self.setVar(line[i-1], line[i+1])
+        return i+2
+
+    def setVar(self, varName, varValue):
+        self.var[varName] = varValue    
 
     def new(self, line, i):
-        print(line[i + 1])
         if line[i + 1][:8] == "Creature":
-            creature = eval(line[i + 1])
+            print(line[i+1][8:])
+            creature = eval("Creature" + self.useVars(line[i+1][8:]))
             compileCode.write(creature.text())
+            return i+2
 
-        return i+2
+        compileCode.error(f'''Imporper New Value on line: 
+        {" ".join(line)}''')
 
 
 class Creature():
-    def __init__(self, sprite, ID="", name="template", bodyType="Humanoid LARGE", gender='', damage=15, defense=15, firstNameGen='', fullTitle="false", permanentEffects='', meleeIncrease='', spellIncrease='', archeryIncrease='', hatedByEffect='', spellSchools='', inventory = ''):
+    def __init__(self, name="template", sprite = "", ID="", damage=15, defense=15, bodyType="Humanoid LARGE", gender='', firstNameGen='', fullTitle="false", permanentEffects='', meleeIncrease='', spellIncrease='', archeryIncrease='', hatedByEffect='', spellSchools='', inventory=''):
         super().__init__()
-
-        print("creater inint")
 
         self.sprite = sprite
         self.name = name
@@ -52,6 +58,11 @@ class Creature():
             self.ID = name.capitalize()
         else:
             self.ID = ID
+
+        if sprite == "":
+            self.sprite = name.lower()
+        else:
+            self.sprite = sprite
 
 
     def text(self):
@@ -85,7 +96,5 @@ class Creature():
   }}
   '''
 
-  class Var():
-      pass
-
+        
 
