@@ -19,10 +19,10 @@ def execute(file):
             if line[i] in parse.funcList:
                 if line[i] in parse.DiffCall.keys():
                     line[i] = parse.DiffCall[line[i]]
-                #try:
-                i = getattr(Parse, line[i])(parse, line, i)
-                #except Exception as e:
-                #    error(f"Error:{e}, form line {' '.join(line)}")
+                try:
+                    i = getattr(Parse, line[i])(parse, line, i)
+                except Exception as e:
+                    error(f"Error:{e}, form line {' '.join(line)}")
             else:
                 i+=1
             
