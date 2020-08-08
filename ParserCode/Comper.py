@@ -1,47 +1,56 @@
-import ctypes 
+import ctypes
 import sys
 import os
 from ast import literal_eval
 import pathlib
+"""This Compiles EPP files into configs"""
 
-"""Initialises other classes, and serves as a connector between them"""
 class Manager():
+    """Initialises other classes, and serves as a connector between them.
+    Also holds general utility functions"""
+
     def __init__(self):
         super().__init__()
-
-        self.util = Util(self)
         self.FileM = FileManager(self)
         self.Func = Functions(self)
 
-        self.FileM.readFiles()
-        self.FileM.clearFiles()
+    def Compile(self):
+        self.files = self.FileM.readFiles()
+        self.FileM.clearOutputFiles()
+        self.Func.execute(self.FileM.files.pop(0))
 
-        self.execute(self.FileM.files.pop(0)) 
+    def Mbox(self, title, text, style):
+        return ctypes.windll.user32.MessageBoxW(0, text, title, style)
 
-    def execute(self, file):
-        for line in file:
-            i = 0
-            while i < len(line):
-                i = self.Func.runFunc(line, i)
+    def error(self, error):
+        self.Mbox("Error", error, 0)
+        sys.exit(1)
 
-"""Loads/Writes to most of the EPP files"""
+
 class FileManager():
+    """Loads/Writes to most of the EPP files"""
+
     def __init__(self, manager):
         super().__init__()
+        self.files = []
         self.manager = manager
+        self.path = pathlib.Path(__file__).parent.absolute()
 
     def write(self, lines):
-        with open(str(pathlib.Path(__file__).parent.absolute().parent.parent) + "\creatures.txt", "a") as f:
+        with open(str(self.path.parent.parent) + "\creatures.txt", "a") as f:
             f.write(lines)
 
-    def clearFiles(self):
-        with open(str(pathlib.Path(__file__).parent.absolute().parent.parent) + "\creatures.txt", "w") as f:
+    def clearOutputFiles(self):
+        with open(str(self.path.parent.parent) + "\creatures.txt", "w") as f:
             f.write("")
 
     def readFiles(self):
         self.files = []
-        with open(str(pathlib.Path(__file__).parent.absolute().parent) + "\code\Epp_creatures.txt") as f:
+
+        with open(str(self.path.parent) + "\code\Epp_creatures.txt") as f:
             self.files.append(self.parseLine(f.read()))
+
+        return self.files
 
     def parseLine(self, txt):
         output = []
@@ -50,65 +59,68 @@ class FileManager():
         for line in txt:
             output.append(line.split(" "))
 
-        while([""] in output):
+        while ([""] in output):
             output.remove([""])
 
         return output
 
-"""Holder general utility functions used by all classes"""
-class Util():
-    def __init__(self, manager):
-        super().__init__()
-        self.manager = manager
 
-    def Mbox(self, title, text, style):
-        return ctypes.windll.user32.MessageBoxW(0, text, title, style)
-
-    def error(self, error):
-        self.Mbox("Error", error, 0)
-        sys.exit(1)        
-
-"""Runs Functions from EPP files"""
 class Functions():
+    """Runs Functions from EPP files"""
+
     def __init__(self, manager):
         super().__init__()
-        self.funcList = {'=':self.equal, 'var':self.Nvar}
+        self.pos = 0
+        self.funcList = {'=': self.equal, 'var': self.Nvar}
         self.var = {"Null": None}
         self.manager = manager
 
-    """Utility functions"""
+#   ###Utility functions###
+
+    def execute(self, file):
+        for line in file:
+            self.pos = 0
+            while self.pos < len(line):
+                self.runFunc(line)
+
     def useVars(self, perams):
         return str(tuple(perams[1:-1].split(",")))
 
     def setVar(self, varName, varValue):
         self.var[varName] = varValue
 
-    def runFunc(self, line, i):
-        if line[i] in self.funcList.keys():
-            i = self.funcList[line[i]](line, i)
+    def runFunc(self, line):
+        if line[self.pos] in self.funcList.keys():
+            self.funcList[line[self.pos]](line)
         else:
-            self.manager.util.error(f'''Unknown Token on line: {" ".join(line)}''')
-
-        return i
-
-    """Functions to be run"""
-
-    def equal(self, line, i):
-        self.setVar(line[i-1], line[i+1])
-        return i+2
-
-    def Nvar(self, line, i):
-        self.setVar(line[i + 1], None)
-        return i+2
+            self.manager.error(f'''Unknown Token on line: {" ".join(line)}''')
 
 
-"""Holds a template"""
+#   ###Functions to be run###
+
+    def equal(self, line):
+    
+        self.setVar(line[self.pos - 1], line[self.pos + 1])
+        self.pos += 2
+
+    def Nvar(self, line):
+        self.setVar(line[self.pos + 1], None)
+        self.pos += 2
+
+
 class Template():
-    def __init__(self, manager):
+    """Holds a template"""
+
+    def __init__(self, ):
         super().__init__()
+
+
+
 
 def run():
     manager = Manager()
+    manager.Compile()
+
 
 if __name__ == "__main__":
     run()
