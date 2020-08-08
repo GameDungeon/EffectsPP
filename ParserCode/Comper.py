@@ -2,45 +2,45 @@ import ctypes
 import sys
 import os
 from ast import literal_eval
-from pathlib import Path
+import pathlib
 
-
+"""Initialises other classes, and serves as a connector between them"""
 class Manager():
     def __init__(self):
         super().__init__()
 
         self.util = Util(self)
-
         self.FileM = FileManager(self)
         self.Func = Functions(self)
 
         self.FileM.readFiles()
-        self.FileM.clearFiles()  # clears output file
+        self.FileM.clearFiles()
 
-        self.execute(self.FileM.files.pop(0))  # executes creatures.txt
+        self.execute(self.FileM.files.pop(0)) 
 
     def execute(self, file):
         for line in file:
             i = 0
             while i < len(line):
-                self.Func.runFunc(line, i)
+                i = self.Func.runFunc(line, i)
 
+"""Loads/Writes to most of the EPP files"""
 class FileManager():
     def __init__(self, manager):
         super().__init__()
         self.manager = manager
 
     def write(self, lines):
-        with open(str(Path(os.path.dirname(os.path.realpath(__file__))).parent.parent) + "\creatures.txt", "a") as f:
+        with open(str(pathlib.Path(__file__).parent.absolute().parent.parent) + "\creatures.txt", "a") as f:
             f.write(lines)
 
     def clearFiles(self):
-        with open(str(Path(os.path.dirname(os.path.realpath(__file__))).parent.parent) + "\creatures.txt", "w") as f:
+        with open(str(pathlib.Path(__file__).parent.absolute().parent.parent) + "\creatures.txt", "w") as f:
             f.write("")
 
     def readFiles(self):
         self.files = []
-        with open(str(Path(os.path.dirname(os.path.realpath(__file__))).parent) + "\code\Epp_creatures.txt") as f:
+        with open(str(pathlib.Path(__file__).parent.absolute().parent) + "\code\Epp_creatures.txt") as f:
             self.files.append(self.parseLine(f.read()))
 
     def parseLine(self, txt):
@@ -55,33 +55,28 @@ class FileManager():
 
         return output
 
+"""Holder general utility functions used by all classes"""
 class Util():
     def __init__(self, manager):
         super().__init__()
         self.manager = manager
-        self.DiffCall = {'=': "equal"}
-
-    def getCall(self, func):
-        if func in self.DiffCall.keys():
-            return self.DiffCall[func]
-        else:
-            return func
 
     def Mbox(self, title, text, style):
         return ctypes.windll.user32.MessageBoxW(0, text, title, style)
 
     def error(self, error):
         self.Mbox("Error", error, 0)
-        sys.exit()        
+        sys.exit(1)        
 
+"""Runs Functions from EPP files"""
 class Functions():
     def __init__(self, manager):
         super().__init__()
-        self.funcList = ['new', '=']
+        self.funcList = {'=':self.equal, 'var':self.Nvar}
         self.var = {"Null": None}
         self.manager = manager
 
-    ###Utility Functions For Functions
+    """Utility functions"""
     def useVars(self, perams):
         return str(tuple(perams[1:-1].split(",")))
 
@@ -89,33 +84,28 @@ class Functions():
         self.var[varName] = varValue
 
     def runFunc(self, line, i):
-        if line[i] in self.funcList:
-            line[i] = Util.getCall(line[i])
-            try:
-                i, output = getattr(self, line[i])(line, i)
-            except Exception as e:
-                self.manager.util.error(
-                    f"Error:{e}, from line {' '.join(line)}")
+        if line[i] in self.funcList.keys():
+            i = self.funcList[line[i]](line, i)
         else:
-            self.manager.util.error(f"No Function, from line {' '.join(line)}")
+            self.manager.util.error(f'''Unknown Token on line: {" ".join(line)}''')
 
-    ###Functions
+        return i
+
+    """Functions to be run"""
 
     def equal(self, line, i):
         self.setVar(line[i-1], line[i+1])
-        return i+2, None
+        return i+2
 
-    def new(self, line, i):
-        if line[i + 1][:8] == "Creature":
-            creature = eval("Creature" + self.useVars(line[i+1][8:]))
-            Compile.write(creature.text())
-            return i+2, None
+    def Nvar(self, line, i):
+        self.setVar(line[i + 1], None)
+        return i+2
 
-        compileCode.error(f'''Imporper New Value on line: 
-        {" ".join(line)}''')
 
+"""Holds a template"""
 class Template():
-    pass
+    def __init__(self, manager):
+        super().__init__()
 
 def run():
     manager = Manager()

@@ -1,0 +1,19 @@
+"[name]"
+  {
+    viewId = { "[viewID]]" }
+    attr = {
+      DAMAGE [damage]
+      DEFENSE [defense]
+    }
+    body = {
+      type = [bodytype]
+    }
+    chatReactionFriendly = "[chatReactionFriendly]"
+    chatReactionHostile = "[chatReactionHostile]"
+    maxLevelIncrease = {
+      MELEE [MaxMelee]
+    }
+    name = {
+      name = "[name]"
+    }
+  }
