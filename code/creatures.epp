@@ -1,0 +1,5 @@
+var Attack = 20;
+
+template creature(Steve,steve,Attack,10,a,a,a,20,a);
+
+write;

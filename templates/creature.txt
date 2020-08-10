@@ -1,6 +1,6 @@
 "[name]"
   {
-    viewId = { "[viewID]]" }
+    viewId = { "[viewID]" }
     attr = {
       DAMAGE [damage]
       DEFENSE [defense]
@@ -17,3 +17,4 @@
       name = "[name]"
     }
   }
+  

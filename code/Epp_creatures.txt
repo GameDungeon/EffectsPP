@@ -1,3 +1,0 @@
-var Attack = 20;
-
-new Creature(name="Creature1", attack = Attack);
